@@ -1,8 +1,6 @@
 name: Build virtctl binary
 
 on:
-  push:
-    branches: [main, master]
   workflow_dispatch:
 
 permissions:
