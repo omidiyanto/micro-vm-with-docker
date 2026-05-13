@@ -22,7 +22,7 @@ A Docker-backed Micro VM management CLI. Compiles to a single ~1.3 MB binary wit
 Install the latest `virtctl` binary in one line (Linux x86_64):
 
 ```bash
-curl https://raw.githubusercontent.com/omidiyanto/micro-vm-with-docker/refs/heads/main/install.sh | sh
+curl -s https://raw.githubusercontent.com/omidiyanto/micro-vm-with-docker/refs/heads/main/install.sh | sh
 ```
 
 The installer downloads the latest published binary into `/usr/local/bin/virtctl`, marks it executable, and prints the installed version. It uses `sudo` internally, so you may be prompted for your password.
