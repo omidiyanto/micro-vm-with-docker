@@ -1,0 +1,26 @@
+network:
+  - name: "net01"
+    subnet: "172.25.0.0/16"
+    gateway: "172.25.0.1"
+    dns:
+      - "8.8.8.8"
+      - "1.1.1.1"
+
+virtual-machines:
+  - name: "vm01"
+    image: ghcr.io/omidiyanto/micro-vm-with-docker/ubuntu:noble
+    cpu: 0.5
+    ram: 512
+    network: "net01"
+    ipv4: "172.25.0.10"
+    extra-disk:
+      - "1G"
+      - "2G"
+      - "512M"
+
+  - name: "vm02"
+    image: ghcr.io/omidiyanto/micro-vm-with-docker/ubuntu:noble
+    cpu: 0.7
+    ram: "1G"
+    network: "net01"
+    ipv4: "DHCP"
