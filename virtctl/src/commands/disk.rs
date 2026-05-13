@@ -129,7 +129,7 @@ fn back_file_for(name: &str, loop_dev: &str) -> Result<String> {
 
 fn list_managed_disks(name: &str) -> Result<Vec<(String, String, String)>> {
     let output =
-        docker::container_exec_capture(name, &["losetup", "-nO", "NAME,SIZE,BACK-FILE", "--list"])?;
+        docker::container_exec_capture(name, &["losetup", "-nO", "NAME,BACK-FILE", "--list"])?;
     if !output.status.success() {
         bail!(
             "losetup --list failed: {}",
@@ -140,17 +140,33 @@ fn list_managed_disks(name: &str) -> Result<Vec<(String, String, String)>> {
     let mut result = Vec::new();
     for line in stdout.lines() {
         let parts: Vec<&str> = line.split_whitespace().collect();
-        if parts.len() < 3 {
+        if parts.len() < 2 {
             continue;
         }
         let dev = parts[0].to_string();
-        let size = parts[1].to_string();
-        let back = parts[2..].join(" ");
-        if is_managed_disk_backing(&back) {
-            result.push((dev, size, back));
+        let back = parts[1..].join(" ");
+        if !is_managed_disk_backing(&back) {
+            continue;
         }
+        let size = loop_device_size(name, &dev).unwrap_or_else(|_| "?".into());
+        result.push((dev, size, back));
     }
     Ok(result)
+}
+
+fn loop_device_size(vm: &str, dev: &str) -> Result<String> {
+    let output = docker::container_exec_capture(vm, &["lsblk", "-nbdo", "SIZE", dev])?;
+    if !output.status.success() {
+        bail!(
+            "lsblk {dev} failed: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
+    }
+    let bytes: u64 = String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .parse()
+        .with_context(|| format!("invalid size returned for '{dev}'"))?;
+    Ok(util::format_bytes(bytes))
 }
 
 fn is_managed_disk_backing(path: &str) -> bool {
